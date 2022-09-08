@@ -15,11 +15,7 @@ public class ConnectionPool {
         //.....
         for (int i = 0; i < poolSize; i++) {
             System.out.println("add connection " + i);
-            availableConns.add(getConnection());
-        }
-        for (Connection con : availableConns) {
-            System.out.println("start" );
-            con.start();
+            availableConns.add(getConnection()); // getConnection создает новое подключние
         }
     }
 
@@ -37,14 +33,19 @@ public class ConnectionPool {
         return INSTANCE; // если был создан уже то возвращается ранее созданный объект
     }
 
-    public synchronized Connection getConnection() {
+//    public void setConnections(List<Connection> connections) {this.connections = connections;} // add
+
+    private  Connection getConnection() {
         // создает новое подключение
+        Connection connection = new Connection();
+//        Connection connection = connections.remove(connections.size()-1);
         System.out.println("get connection");
-        return new Connection(3);
+        return connection;
     }
 
-
     public synchronized Connection retrieve() {
+        //забирает из aviable и добавляет его в used
+        // затем возвращает это соединение, оно становится используемым
         Connection newConn = null;
         // проверяем есть ли свободные соединения
         if (availableConns.size() == 0) {
@@ -60,7 +61,7 @@ public class ConnectionPool {
         return newConn; // тем самым он становится используемым
     }
 
-    public synchronized void releaseConnection (Connection connection) throws NullPointerException {
+    public synchronized void releaseConnection(Connection connection) throws NullPointerException {
         if (connection != null) {
             if (usedConns.remove(connection)) {
                 availableConns.add(connection);
@@ -70,10 +71,10 @@ public class ConnectionPool {
         }
     }
 
+    // получить количество свободных соединений
     public int getAvailableConnsCnt() {
         return availableConns.size();
     }
-
 
     public static int getPoolSize() {
         return poolSize;

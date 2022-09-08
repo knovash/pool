@@ -41,4 +41,12 @@ public class Connection extends Thread {
     public void delete() {
         System.out.println("Delete");
     }
+
+    public int getNumber() {
+        return number;
+    }
+
+    public void setNumber(int number) {
+        this.number = number;
+    }
 }
