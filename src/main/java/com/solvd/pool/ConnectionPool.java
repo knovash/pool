@@ -11,6 +11,8 @@ public class ConnectionPool {
     private List<Connection> availableConns = new ArrayList<>(); // доступные для использования соединения
     private List<Connection> usedConns = new ArrayList<>(); // используемые
 
+    // лист конекшенов надо просетать в конекшенпул??? сделать сеттер?
+
     private ConnectionPool(int poolSize) { // приватный конструктор
         //.....
         for (int i = 0; i < poolSize; i++) {
@@ -19,12 +21,12 @@ public class ConnectionPool {
         }
     }
 
-//  Будут методы внутри пула:
+//    внутри ConnectionPool. Будут методы внутри пула:
 //- getInstance (Singleton - потокобезопасный)
 //- synchronize Connection getConnection()
 //- void releaseConnection(Connection connection)
 
-    //метод для создание объекта класса. создать инстанс
+    //метод для создание объекта класса ConnectionPool. создать инстанс
     public static ConnectionPool getInstance(int poolSize) { // первый раз для создания объекта вызываем метод getInstance
         // сначало проверить небыл ли создан ранее. для этого есть поле
         if (INSTANCE == null) {
@@ -33,12 +35,12 @@ public class ConnectionPool {
         return INSTANCE; // если был создан уже то возвращается ранее созданный объект
     }
 
-//    public void setConnections(List<Connection> connections) {this.connections = connections;} // add
 
-    private  Connection getConnection() {
+    private synchronized Connection getConnection() { // надо забирать конекшн из списка connections ?
         // создает новое подключение
-        Connection connection = new Connection();
-//        Connection connection = connections.remove(connections.size()-1);
+//        Connection connection = new Connection();
+        Connection connection = connections.remove(connections.size()-1);
+        // чтото я немогу понять в какой момент мы передаем список connections из мэйна в connectionpool ?????
         System.out.println("get connection");
         return connection;
     }

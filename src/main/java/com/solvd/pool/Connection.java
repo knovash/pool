@@ -13,18 +13,22 @@ public class Connection extends Thread {
     }
 
     @Override // для выполнения моей задачи надо заовеерайдить метод run
-    public void run() {
-        int t = pauseRnd(5);
-        System.out.println("Connection run " + number + " t=" + t);
+    public void run() { // выполнится при запуске множества потоков из списка connections
+        System.out.println("Connection start");
+        pauseRnd(3);
+        System.out.println("Connection end");
     }
 
-    public synchronized Connection getConnection() {
-        
+    public synchronized Connection getConnection() { // незнаю зачем
         System.out.println("Connection start");
         pauseRnd(3);
         System.out.println("Connection end");
         return new Connection();
     }
+
+//    Есть какой то класс (обычный) с 5 методами (например CRUD f.e System.out.println(“I saved”)), назовите его Connection
+//    а зачем эти пять методов? конекшен будет выполнять только run()?
+
 
     public void create() {
         System.out.println("Create");
