@@ -14,38 +14,37 @@ public class ConnectionPool {
     // лист конекшенов надо просетать в конекшенпул??? сделать сеттер?
 
     private ConnectionPool(int poolSize) { // приватный конструктор
-        //.....
+        System.out.println("Constructor ConnectionPool size=" + poolSize);
         for (int i = 0; i < poolSize; i++) {
-            System.out.println("add connection " + i);
+            System.out.println("availableConns.add(getConnection()) i=" + i);
             availableConns.add(getConnection()); // getConnection создает новое подключние
         }
     }
 
-//    внутри ConnectionPool. Будут методы внутри пула:
-//- getInstance (Singleton - потокобезопасный)
-//- synchronize Connection getConnection()
-//- void releaseConnection(Connection connection)
 
     //метод для создание объекта класса ConnectionPool. создать инстанс
     public static ConnectionPool getInstance(int poolSize) { // первый раз для создания объекта вызываем метод getInstance
         // сначало проверить небыл ли создан ранее. для этого есть поле
         if (INSTANCE == null) {
             INSTANCE = new ConnectionPool(poolSize); // если небыло то создается объект
+            System.out.println("\nCreated ConnectionPool size=" + poolSize);
         }
         return INSTANCE; // если был создан уже то возвращается ранее созданный объект
     }
 
 
     private synchronized Connection getConnection() { // надо забирать конекшн из списка connections ?
+        System.out.println("getConnection: new connection");
         // создает новое подключение
-//        Connection connection = new Connection();
-        Connection connection = connections.remove(connections.size()-1);
-        // чтото я немогу понять в какой момент мы передаем список connections из мэйна в connectionpool ?????
-        System.out.println("get connection");
+        Connection connection = new Connection();
+//        Connection connection = availableConns.remove(availableConns.size()-1);
         return connection;
     }
 
     public synchronized Connection retrieve() {
+        System.out.println("\nretrieve:");
+        System.out.println("availableConns.size()=" + availableConns.size());
+        System.out.println("usedConns.size()=" + usedConns.size());
         //забирает из aviable и добавляет его в used
         // затем возвращает это соединение, оно становится используемым
         Connection newConn = null;
@@ -54,16 +53,20 @@ public class ConnectionPool {
             newConn = getConnection(); // если нет то создаем новое соединение
         } else {
             // забирает из availableConns крайний Connection
-            newConn = (Connection) availableConns.get(availableConns.size());
-            availableConns.remove(availableConns.size());
+            newConn = (Connection) availableConns.get(availableConns.size()-1);
+            availableConns.remove(availableConns.size()-1);
         }
         // добавляет его в usedConns
         usedConns.add(newConn);
+        System.out.println("usedConns.add(newConn) usedConns.size()=" + usedConns.size());
         // затем возвращает это соединение
         return newConn; // тем самым он становится используемым
     }
 
     public synchronized void releaseConnection(Connection connection) throws NullPointerException {
+        System.out.println("\nreleaseConnection");
+        System.out.println("availableConns.size()=" + availableConns.size());
+        System.out.println("usedConns.size()=" + usedConns.size());
         if (connection != null) {
             if (usedConns.remove(connection)) {
                 availableConns.add(connection);

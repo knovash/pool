@@ -1,28 +1,24 @@
 package com.solvd.pool;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.stream.IntStream;
-
 public class Main {
 
     public static void main(String[] args) {
 
 // Создать connection pool с фиксированным количеством коннекшенов и много потоков (с помощью Runnable и Thread)
 
-        System.out.println("test ConnectionPull");
+        System.out.println("ConnectionPull");
 
         // создаю конекшен пулл на 5 потоков
+        System.out.println("\nTry create conection pool size=5\n");
         ConnectionPool connectionPool = ConnectionPool.getInstance(5);
 
-
+        System.out.println("\nStart for 20 create connections\n");
         for (int i = 0; i < 20; i++) {
+            int finalI = i;
             new Thread(() -> {
                 Connection connection = connectionPool.retrieve(); // получить соединение в пуле
-                connection.read(); // выполнение конекшена. например чтение. со случайной задержкой
+                connection.read(finalI); // выполнение конекшена. например чтение. со случайной задержкой
+                System.out.println("connectionPool.releaseConnection(connection)");
                 connectionPool.releaseConnection(connection); // после выполнения освободить соединение
             }).start();
 

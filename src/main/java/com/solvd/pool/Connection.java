@@ -11,11 +11,11 @@ public class Connection {
         System.out.println("Create");
     }
 
-    public void read() {
-        System.out.println("Read start");
-        pauseRnd(3);
-        System.out.println("Read end");
-        System.out.println("Read");
+    public void read(int i) {
+        System.out.println("Read start " + i);
+        pauseRnd(5);
+        System.out.println("Read end " + i);
+        System.out.println("Read " + i);
     }
 
     public void update() {
