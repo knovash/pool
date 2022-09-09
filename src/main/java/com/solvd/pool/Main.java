@@ -18,17 +18,16 @@ public class Main {
         // создаю конекшен пулл на 5 потоков
         ConnectionPool connectionPool = ConnectionPool.getInstance(5);
 
-        List<Connection> connections = new ArrayList<>(); // создаю список конекшнов
 
-        // создаем множетво потоков иммитируя обращения пользователей
-        // я создаю конекшены. добавляю их в список конекшенов и запускаю каждый поток
         for (int i = 0; i < 20; i++) {
-            Connection con = new Connection(1);
-            connections.add(con);
-            connections.get(connections.size()-1).start();
-            // в коннекшене запустится @Override run(). поток выполниться со случайной задержкой до 5сек
-            System.out.println("connection created " + i + " and added to connections");
+            new Thread(() -> {
+                Connection connection = connectionPool.retrieve(); // получить соединение в пуле
+                connection.read(); // выполнение конекшена. например чтение. со случайной задержкой
+                connectionPool.releaseConnection(connection); // после выполнения освободить соединение
+            }).start();
+
         }
+
 
 //        в мэйне мы создаем множество потоков имитруя пользователей
 //        и в параметрах каждого потока обращаемся к пулу за коннекшином
