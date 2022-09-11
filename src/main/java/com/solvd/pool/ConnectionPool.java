@@ -1,26 +1,25 @@
 package com.solvd.pool;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.sql.Statement;
+import java.util.*;
 
 public class ConnectionPool {
     // у сингл тона должен быть приватный конструктор. так запрещает создавать объект класса извне
     // объект будет создаваться внутри класса статическим методом
     private static ConnectionPool INSTANCE; // поле класса для проверки существования, в него заносим тот единственный объект этого класа
     private static int poolSize;
-    private List<Connection> availableConns = new ArrayList<>(); // доступные для использования соединения
-    private List<Connection> usedConns = new ArrayList<>(); // используемые
-
-    // лист конекшенов надо просетать в конекшенпул??? сделать сеттер?
+    private int conNum = 0;
+    private Stack<Connection> availableConns = new Stack<>(); // доступные для использования соединения
+    private Set<Connection> usedConns = new HashSet<>(); // используемые
 
     private ConnectionPool(int poolSize) { // приватный конструктор
         System.out.println("Constructor ConnectionPool size=" + poolSize);
+        List<Connection> pool = new ArrayList<>(poolSize);
         for (int i = 0; i < poolSize; i++) {
             System.out.println("availableConns.add(getConnection()) i=" + i);
-            availableConns.add(getConnection()); // getConnection создает новое подключние
+            pool.add(createConnection()); // getConnection создает новое подключние
         }
     }
-
 
     //метод для создание объекта класса ConnectionPool. создать инстанс
     public static ConnectionPool getInstance(int poolSize) { // первый раз для создания объекта вызываем метод getInstance
@@ -32,60 +31,93 @@ public class ConnectionPool {
         return INSTANCE; // если был создан уже то возвращается ранее созданный объект
     }
 
+    public static Connection createConnection() {
+        System.out.println("createConnection:");
+        Connection connectionNew = null;
+        connectionNew = new Connection(); // = DriverManager.getConnection(...);
 
-    private synchronized Connection getConnection() { // надо забирать конекшн из списка connections ?
-        System.out.println("getConnection: new connection");
-        // создает новое подключение
-        Connection connection = new Connection();
-//        Connection connection = availableConns.remove(availableConns.size()-1);
+        return connectionNew;
+    }
+
+    public synchronized Connection getConnection() { // надо забирать конекшн из списка connections ?
+        Connection connection = null;
+        if (availableConns.size() == 0 && conNum >= poolSize) { // если пулл переполнен.
+            throw new RuntimeException("pool is full");
+        }
+//        connection = getConnectionFromPool();
+        if (availableConns.size() > 0) { // если пул свободных конекшенов больше нуля
+            connection = availableConns.pop(); // забираем из свободных
+            //occupiedPool.add(conn);
+            usedConns.add(connection); // добавляем его в активные
+        }
+
+//        if (connection == null) {
+////            connection = createNewConnectionForPool();
+//            connection = createConnection();
+//            conNum++;
+//            usedConns.add(connection);
+//        }
+//        connection = makeAvailable(connection);
         return connection;
     }
 
-    public synchronized Connection retrieve() {
-        System.out.println("\nretrieve:");
-        System.out.println("availableConns.size()=" + availableConns.size());
-        System.out.println("usedConns.size()=" + usedConns.size());
-        //забирает из aviable и добавляет его в used
-        // затем возвращает это соединение, оно становится используемым
-        Connection newConn = null;
-        // проверяем есть ли свободные соединения
-        if (availableConns.size() == 0) {
-            newConn = getConnection(); // если нет то создаем новое соединение
-        } else {
-            // забирает из availableConns крайний Connection
-            newConn = (Connection) availableConns.get(availableConns.size()-1);
-            availableConns.remove(availableConns.size()-1);
-        }
-        // добавляет его в usedConns
-        usedConns.add(newConn);
-        System.out.println("usedConns.add(newConn) usedConns.size()=" + usedConns.size());
-        // затем возвращает это соединение
-        return newConn; // тем самым он становится используемым
-    }
-
     public synchronized void releaseConnection(Connection connection) throws NullPointerException {
-        System.out.println("\nreleaseConnection");
-        System.out.println("availableConns.size()=" + availableConns.size());
-        System.out.println("usedConns.size()=" + usedConns.size());
-        if (connection != null) {
-            if (usedConns.remove(connection)) {
-                availableConns.add(connection);
-            } else {
-                throw new NullPointerException("Connection not in the usedConns");
-            }
+        if (connection == null) {
+            throw new NullPointerException("connection null");
+        } // если конекшен нул
+        if (!usedConns.remove(connection)) {
+            throw new RuntimeException("connection not for this pool");
+        } // удаляем конекшен из пула активных конекшенов
+        availableConns.push(connection); // добавляем его в пул свободных конекшенов
+    }
+
+//    private synchronized boolean isFull() { // если пул соединений пустой
+//        return (availableConns.size() == 0 && conNum >= poolSize);
+//        // пул соединений пустой. больше из него нечего взять. и количество созданных соединений максимально
+//    }
+
+//    private Connection createNewConnectionForPool() {
+//        Connection connection = createNewConnection();
+//        conNum++;
+//        usedConns.add(connection);
+//        return connection;
+//    }
+
+
+//    private Connection createNewConnection() {
+//        Connection connection = null;
+//        connection = new Connection();
+//        return connection;
+//    }
+
+//    private Connection getConnectionFromPool() {
+//        Connection connection = null;
+//        if (availableConns.size() > 0) { // если пул свободных конекшенов больше нуля
+//            connection = availableConns.pop(); // забираем из свободных
+//            //occupiedPool.add(conn);
+//            usedConns.add(connection); // добавляем его в активные
+//        }
+//        return connection;
+//    }
+
+    private Connection makeAvailable(Connection connection) {
+        if (isConnectionAvailable(connection)) { // если конекшен рабочий
+            return connection; // выход и возврат конекшена
         }
+        // если конекшен нерабочий то
+        usedConns.remove(connection);
+        conNum--;
+//        connection.close();
+        connection = createConnection(); // чтобы непотерять конекшен создаем новый и добавляем в активные и возвращаем его
+        usedConns.add(connection);
+        conNum++;
+        return connection;
     }
 
-    // получить количество свободных соединений
-    public int getAvailableConnsCnt() {
-        return availableConns.size();
+    private boolean isConnectionAvailable(Connection connection) {
+//        try (Statement st = connection.createStatement())
+        connection.read(3);
+        return true;
     }
 
-    public static int getPoolSize() {
-        return poolSize;
-    }
-
-    public static void setPoolSize(int poolSize) {
-        ConnectionPool.poolSize = poolSize;
-    }
 }
