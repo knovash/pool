@@ -14,10 +14,10 @@ public class ConnectionPool {
 
     private ConnectionPool(int poolSize) { // приватный конструктор
         System.out.println("Constructor ConnectionPool size=" + poolSize);
-        List<Connection> pool = new ArrayList<>(poolSize);
+//        List<Connection> pool = new ArrayList<>(poolSize);
         for (int i = 0; i < poolSize; i++) {
             System.out.println("availableConns.add(getConnection()) i=" + i);
-            pool.add(createConnection()); // getConnection создает новое подключние
+            availableConns.add(createConnection()); // getConnection создает новое подключние
         }
     }
 
@@ -41,23 +41,13 @@ public class ConnectionPool {
 
     public synchronized Connection getConnection() { // надо забирать конекшн из списка connections ?
         Connection connection = null;
-        if (availableConns.size() == 0 && conNum >= poolSize) { // если пулл переполнен.
-            throw new RuntimeException("pool is full");
-        }
-//        connection = getConnectionFromPool();
         if (availableConns.size() > 0) { // если пул свободных конекшенов больше нуля
             connection = availableConns.pop(); // забираем из свободных
-            //occupiedPool.add(conn);
             usedConns.add(connection); // добавляем его в активные
         }
-
-//        if (connection == null) {
-////            connection = createNewConnectionForPool();
-//            connection = createConnection();
-//            conNum++;
-//            usedConns.add(connection);
-//        }
-//        connection = makeAvailable(connection);
+        else { // если пулл переполнен.
+            throw new RuntimeException("no free connections");
+        }
         return connection;
     }
 
@@ -70,54 +60,4 @@ public class ConnectionPool {
         } // удаляем конекшен из пула активных конекшенов
         availableConns.push(connection); // добавляем его в пул свободных конекшенов
     }
-
-//    private synchronized boolean isFull() { // если пул соединений пустой
-//        return (availableConns.size() == 0 && conNum >= poolSize);
-//        // пул соединений пустой. больше из него нечего взять. и количество созданных соединений максимально
-//    }
-
-//    private Connection createNewConnectionForPool() {
-//        Connection connection = createNewConnection();
-//        conNum++;
-//        usedConns.add(connection);
-//        return connection;
-//    }
-
-
-//    private Connection createNewConnection() {
-//        Connection connection = null;
-//        connection = new Connection();
-//        return connection;
-//    }
-
-//    private Connection getConnectionFromPool() {
-//        Connection connection = null;
-//        if (availableConns.size() > 0) { // если пул свободных конекшенов больше нуля
-//            connection = availableConns.pop(); // забираем из свободных
-//            //occupiedPool.add(conn);
-//            usedConns.add(connection); // добавляем его в активные
-//        }
-//        return connection;
-//    }
-
-    private Connection makeAvailable(Connection connection) {
-        if (isConnectionAvailable(connection)) { // если конекшен рабочий
-            return connection; // выход и возврат конекшена
-        }
-        // если конекшен нерабочий то
-        usedConns.remove(connection);
-        conNum--;
-//        connection.close();
-        connection = createConnection(); // чтобы непотерять конекшен создаем новый и добавляем в активные и возвращаем его
-        usedConns.add(connection);
-        conNum++;
-        return connection;
-    }
-
-    private boolean isConnectionAvailable(Connection connection) {
-//        try (Statement st = connection.createStatement())
-        connection.read(3);
-        return true;
-    }
-
 }
