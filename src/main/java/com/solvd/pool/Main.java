@@ -11,15 +11,12 @@ public class Main {
         for (int i = 0; i < 20; i++) {
             int finalI = i;
             new Thread(() -> {
-                Connection connection = null; // получить соединение в пуле
-
-                connection = connectionPool.getConnection();
-
-                connection.read(finalI); // выполнение конекшена. например чтение. со случайной задержкой
+                Connection connection = null;
+                connection = connectionPool.getConnection(); /** получить соединение в пуле */
+                connection.read(finalI); /** выполнение конекшена. например чтение. со случайной задержкой */
                 System.out.println("Main: connectionPool.releaseConnection(connection) " + finalI);
-                connectionPool.releaseConnection(connection); // после выполнения освободить соединение
+                connectionPool.releaseConnection(connection); /** после выполнения освободить соединение */
             }).start();
-
         }
     }
 }
