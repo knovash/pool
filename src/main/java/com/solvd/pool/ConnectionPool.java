@@ -2,6 +2,8 @@ package com.solvd.pool;
 
 import java.sql.Statement;
 import java.util.*;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingDeque;
 
 public class ConnectionPool {
     // у сингл тона должен быть приватный конструктор. так запрещает создавать объект класса извне
@@ -9,8 +11,8 @@ public class ConnectionPool {
     private static ConnectionPool INSTANCE; // поле класса для проверки существования, в него заносим тот единственный объект этого класа
     private static int poolSize;
     private int conNum = 0;
-    private Stack<Connection> availableConns = new Stack<>(); // доступные для использования соединения
-    private Set<Connection> usedConns = new HashSet<>(); // используемые
+    private BlockingQueue<Connection> availableConns = new LinkedBlockingDeque<>(); // доступные для использования соединения
+    private BlockingQueue<Connection> usedConns = new LinkedBlockingDeque<>(); // используемые
 
     private ConnectionPool(int poolSize) { // приватный конструктор
         System.out.println("Constructor ConnectionPool size=" + poolSize);
@@ -35,7 +37,6 @@ public class ConnectionPool {
         System.out.println("createConnection:");
         Connection connectionNew = null;
         connectionNew = new Connection(); // = DriverManager.getConnection(...);
-
         return connectionNew;
     }
 
