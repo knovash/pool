@@ -11,7 +11,12 @@ public class Main {
         for (int i = 0; i < 20; i++) {
             int finalI = i;
             new Thread(() -> {
-                Connection connection = connectionPool.getConnection(); // получить соединение в пуле
+                Connection connection = null; // получить соединение в пуле
+                try {
+                    connection = connectionPool.getConnection();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
                 connection.read(finalI); // выполнение конекшена. например чтение. со случайной задержкой
                 System.out.println("Main: connectionPool.releaseConnection(connection) " + finalI);
                 connectionPool.releaseConnection(connection); // после выполнения освободить соединение

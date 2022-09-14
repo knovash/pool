@@ -40,10 +40,10 @@ public class ConnectionPool {
         return connectionNew;
     }
 
-    public synchronized Connection getConnection() { // надо забирать конекшн из списка connections ?
+    public synchronized Connection getConnection() throws InterruptedException { // надо забирать конекшн из списка connections ?
         Connection connection = null;
         if (availableConns.size() > 0) { // если пул свободных конекшенов больше нуля
-            connection = availableConns.pop(); // забираем из свободных
+            connection = availableConns.take(); // забираем из свободных
             usedConns.add(connection); // добавляем его в активные
         }
         else { // если пулл переполнен.
@@ -59,6 +59,6 @@ public class ConnectionPool {
         if (!usedConns.remove(connection)) {
             throw new RuntimeException("connection not for this pool");
         } // удаляем конекшен из пула активных конекшенов
-        availableConns.push(connection); // добавляем его в пул свободных конекшенов
+        availableConns.add(connection); // добавляем его в пул свободных конекшенов
     }
 }
