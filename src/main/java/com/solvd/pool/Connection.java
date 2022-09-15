@@ -7,14 +7,14 @@ public class Connection {
     }
 
     public void read(int i) {
-        int t = (int) (1 + Math.random() * 5);
-        System.out.println("Connection: Read start " + i + " pause t=" + t);
+        int t = (int) (1 + Math.random() * 6);
+        System.out.println("Connection: Read START i=" + i + " pause t=" + t);
         try {
             Thread.sleep(t * 1000L);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-        System.out.println("Connection: Read end " + i + " pause t=" + t);
+        System.out.println("Connection: Read END i=" + i + " pause t=" + t);
     }
 
     public void update() {
