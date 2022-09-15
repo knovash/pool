@@ -14,7 +14,7 @@ public class Main {
                 System.out.println("START NEW THREAD! i=" + finalI);
                 Connection connection = null;
                 connection = connectionPool.getConnection(); /** получить соединение в пуле */
-                connection.read(finalI); /** выполнение конекшена. например чтение. со случайной задержкой */
+                connection.read(0); /** выполнение конекшена. например чтение. со случайной задержкой */
                 System.out.println("Main: try connectionPool.releaseConnection(connection) i=" + finalI);
                 connectionPool.releaseConnection(connection); /** после выполнения освободить соединение */
             }).start();

@@ -10,9 +10,11 @@ public class Connection {
         int t = (int) (1 + Math.random() * 6);
         System.out.println("Connection: Read START i=" + i + " pause t=" + t);
         try {
+            System.out.println("sleep " + t);
             Thread.sleep(t * 1000L);
         } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+//            throw new RuntimeException(e);
+            System.out.println("connection error");
         }
         System.out.println("Connection: Read END i=" + i + " pause t=" + t);
     }

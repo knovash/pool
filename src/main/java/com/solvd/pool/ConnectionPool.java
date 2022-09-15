@@ -24,7 +24,9 @@ public class ConnectionPool {
             System.out.println("availableConns.add(createConnection() i=" + i);
             availableConns.add(createConnection()); /** createConnection создает новое подключние */
         }
+        System.out.println("availableConns: " + availableConns);
         System.out.println("Constructor: availableConns.size=" + availableConns.size());
+
     }
 
     /**  метод для создание объекта класса ConnectionPool. создать инстанс */
@@ -47,19 +49,22 @@ public class ConnectionPool {
         Connection connection = null;
         try {
             connection = availableConns.take(); /** забираем из свободных */
-            usedConns.add(connection); /** добавляем его в активные */
+            System.out.println("availableConns.take " + connection);
+            usedConns.offer(connection); /** добавляем его в активные */
             System.out.println("try getConnection ok");
         } catch (InterruptedException e) {
             System.out.println("try getConnection: error");
         }
         System.out.println("END getConnection: used=" + usedConns.size() + " availible=" + availableConns.size());
+        System.out.println("availableConns: " + availableConns);
+        System.out.println("usedConns: " + usedConns);
         return connection;
     }
 
-    public synchronized void releaseConnection(Connection connection) {
+    public void releaseConnection(Connection connection) {
         System.out.println("\nSTART releaseConnection: used=" + usedConns.size() + " availible=" + availableConns.size());
         usedConns.remove(connection); /** удаляем конекшен из пула активных конекшенов */
-        availableConns.add(connection); /** добавляем его в пул свободных конекшенов */
+        availableConns.offer(connection); /** добавляем его в пул свободных конекшенов */
         System.out.println("END releaseConnection: used=" + usedConns.size() + " availible=" + availableConns.size());
     }
 }
