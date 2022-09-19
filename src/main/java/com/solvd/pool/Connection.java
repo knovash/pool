@@ -7,16 +7,13 @@ public class Connection {
     }
 
     public void read(int i) {
-        int t = (int) (1 + Math.random() * 6);
-        System.out.println("Connection: Read START i=" + i + " pause t=" + t);
+        int t = (int) (1 + Math.random() * 3);
         try {
-            System.out.println("sleep " + t);
             Thread.sleep(t * 1000L);
         } catch (InterruptedException e) {
-//            throw new RuntimeException(e);
-            System.out.println("connection error");
+            throw new RuntimeException(e);
         }
-        System.out.println("Connection: Read END i=" + i + " pause t=" + t);
+        System.out.println(" Connection READ completed i=" + i + " pause t=" + t);
     }
 
     public void update() {

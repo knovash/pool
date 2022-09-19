@@ -3,19 +3,13 @@ package com.solvd.pool;
 public class Main {
 
     public static void main(String[] args) {
-
-        System.out.println("\nMain: ConnectionPool.getInstance: Create conection pool size=5\n");
-        ConnectionPool connectionPool = ConnectionPool.getInstance(5);
-
-        System.out.println("\nMain: Start for 20 create connections\n");
-        for (int i = 0; i < 20; i++) {
+        ConnectionPool connectionPool = ConnectionPool.getInstance(3);
+        for (int i = 0; i < 10; i++) {
             int finalI = i;
             new Thread(() -> {
-                System.out.println("START NEW THREAD! i=" + finalI);
-                Connection connection = null;
-                connection = connectionPool.getConnection(); /** получить соединение в пуле */
-                connection.read(0); /** выполнение конекшена. например чтение. со случайной задержкой */
-                System.out.println("Main: try connectionPool.releaseConnection(connection) i=" + finalI);
+                System.out.println("START new thread i=" + finalI);
+                Connection connection = connectionPool.getConnection(); /** получить соединение в пуле */
+                connection.read(finalI); /** выполнение конекшена. например чтение. со случайной задержкой */
                 connectionPool.releaseConnection(connection); /** после выполнения освободить соединение */
             }).start();
         }
