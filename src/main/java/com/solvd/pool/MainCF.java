@@ -6,10 +6,10 @@ public class MainCF {
 
     public static void main(String[] args) {
         /** CompletableFuture для запуска потоков */
-        CompletableFuture<Void> c1 = CompletableFuture.runAsync(() -> { // запускается в отдельный поток
+        CompletableFuture<Void> c1 = CompletableFuture.runAsync(() -> { /** запускается в отдельный поток */
             connectionThread();
         });
-        CompletableFuture<Void> c2 = CompletableFuture.runAsync(MainCF::connectionThread); // запускается в отдельный поток
+        CompletableFuture<Void> c2 = CompletableFuture.runAsync(MainCF::connectionThread); /** запускается в отдельный поток */
         CompletableFuture<Void> c3 = CompletableFuture.runAsync(MainCF::connectionThread);
         CompletableFuture<Void> c4 = CompletableFuture.runAsync(MainCF::connectionThread);
         CompletableFuture<Void> c5 = CompletableFuture.runAsync(MainCF::connectionThread);
@@ -18,9 +18,10 @@ public class MainCF {
         CompletableFuture<Void> c8 = CompletableFuture.runAsync(MainCF::connectionThread);
         CompletableFuture<Void> c9 = CompletableFuture.runAsync(MainCF::connectionThread);
         CompletableFuture<Void> c10 = CompletableFuture.runAsync(MainCF::connectionThread);
-        CompletableFuture<Void> cAll = CompletableFuture.allOf(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10);
-        // из многих комплфюч собирается одна, ее окончания потом и будем дожидаться
-        cAll.join(); // после завершения всех потоков. значение Void
+        CompletableFuture<Void> cAll = CompletableFuture.allOf(c2, c3, c4, c5, c6, c7, c8, c9, c10);
+        /** из многих комплфюч собирается одна, ее окончания потом и будем дожидаться */
+        c1.join(); // тут ждем завершение первого потока значение Void (можно соединить все в один allOf и один join)
+        cAll.join(); // тут ждем завершения всех потоков. значение Void
     }
 
     public static void connectionThread() {
